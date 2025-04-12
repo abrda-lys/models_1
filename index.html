@@ -22,21 +22,50 @@
   <div id="viewer"></div>
 
   <script>
-    let viewer;
-
-    function launchViewer(urn) {
-      const options = {
-        env: 'AutodeskProduction',
-        accessToken: 'YOUR_ACCESS_TOKEN', // Замените на ваш токен
+    // Ваши Client ID и Client Secret
+    const clientId = KOl4YRq4ZMorDFdoZwyqRsskBrO32CSXRGq4WgGydMeiDGKq;
+    const clientSecret = lYFHab24T8ZG8FCU2yL9u7lGnq16lfu0IWuedH3M7tWimxgbcoiA6vLDN6vbsmn5;
+    
+    // Функция для получения Access Token
+    function getAccessToken() {
+      const url = 'https://developer.api.autodesk.com/authentication/v1/authenticate';
+      const data = {
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials',
+        scope: 'data:read'
       };
 
-      Autodesk.Viewing.Initializer(options, function() {
-        const viewerDiv = document.getElementById('viewer');
-        viewer = new Autodesk.Viewing.GuiViewer3D(viewerDiv);
-        viewer.start();
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data)
+      })
+      .then(response => response.json())
+      .then(data => data.access_token)
+      .catch(error => {
+        console.error('Error getting access token:', error);
+      });
+    }
 
-        const documentId = 'urn:' + urn;  // Модель должна быть в формате URN
-        Autodesk.Viewing.Document.load(documentId, onDocumentLoadSuccess, onDocumentLoadFailure);
+    // Функция для инициализации и отображения модели
+    function launchViewer(urn) {
+      getAccessToken().then(accessToken => {
+        if (accessToken) {
+          const options = {
+            env: 'AutodeskProduction',
+            accessToken: accessToken
+          };
+
+          Autodesk.Viewing.Initializer(options, function() {
+            const viewerDiv = document.getElementById('viewer');
+            const viewer = new Autodesk.Viewing.GuiViewer3D(viewerDiv);
+            viewer.start();
+
+            const documentId = 'urn:' + urn;  // Модель должна быть в формате URN
+            Autodesk.Viewing.Document.load(documentId, onDocumentLoadSuccess, onDocumentLoadFailure);
+          });
+        }
       });
     }
 
@@ -49,8 +78,8 @@
       console.error('Error loading document: ', viewerError);
     }
 
-    // Для примера загрузим модель с именем model1
-    launchViewer('model1'); // Замените на имя вашей модели
+    // Загрузка модели
+    launchViewer('model1'); // Замените на имя вашей модели (без расширения)
   </script>
 </body>
 </html>
