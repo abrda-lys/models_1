@@ -1,72 +1,134 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="https://storage.yandexcloud.net/mymodels/favicon.ico" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Текущие проекты. СтройОборудование.</title>
-    <style>
-        /* Твой стиль */
-    </style>
-    <script type="module" src="https://unpkg.com/@google/model-viewer@latest/dist/model-viewer.min.js"></script>
-    <script>
-        async function loadModels() {
-            try {
-                const response = await fetch('https://storage.yandexcloud.net/mymodels/models.txt', { mode: 'cors' });
-                if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
-                const text = await response.text();
-                const lines = text.split('\n').filter(line => line.trim() !== '');
-                
-                const grid = document.querySelector('.grid');
-                grid.innerHTML = '';
-                console.log("Загруженные данные:", lines);
+  <meta charset="UTF-8">
+  <link rel="icon" href="https://storage.yandexcloud.net/mymodels/favicon.ico" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Текущие проекты. СтройОборудование.</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+    }
 
-                lines.forEach((line) => {
-                    const [name, url] = line.split(',').map(part => part.trim());
-                    if (name && url) {
-                        const projectDiv = document.createElement('div');
-                        projectDiv.className = 'project';
-                        projectDiv.innerHTML = `
-                            <a href="viewer.html?model=${encodeURIComponent(url)}" class="project-link">
-                                <div class="model-container">
-                                    <model-viewer 
-                                        src="${url}" 
-                                        poster="https://storage.yandexcloud.net/mymodels/label_1.png"
-                                        camera-controls 
-                                        crossOrigin="anonymous"
-                                        camera-orbit="45deg 55deg 2.5m"
-                                        interaction-prompt="none"
-                                        field-of-view="30deg"
-                                        style="width:100%;height:100%">
-                                    </model-viewer>
-                                </div>
-                                <p class="project-title">${name}</p>
-                            </a>
-                        `;
-                        grid.appendChild(projectDiv);
-                    } else {
-                        console.error(`Ошибка в строке: ${line}. Некорректный формат.`);
-                    }
-                });
-            } catch (error) {
-                console.error("Ошибка загрузки списка моделей:", error);
-                document.querySelector('.grid').innerHTML = `
-                    <div style="grid-column:1/-1;text-align:center;color:red;">
-                        Ошибка загрузки данных. Пожалуйста, проверьте файл.
-                    </div>
-                `;
-            }
-        }
+    .container {
+      padding: 40px 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
 
-        document.addEventListener("DOMContentLoaded", loadModels);
-    </script>
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+    }
+
+    .project {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .project:hover {
+      transform: translateY(-5px);
+    }
+
+    .project-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      height: 100%;
+    }
+
+    .model-container {
+      width: 100%;
+      height: 300px;
+      background: #e0e0e0;
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 100%;
+    }
+
+    .project-title {
+      padding: 10px 15px;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+
+  <script type="module" src="https://unpkg.com/@google/model-viewer@latest/dist/model-viewer.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Текущие проекты. СтройОборудование.</h1>
-        <div class="grid">
-            <!-- Модели загружаются через JavaScript -->
-        </div>
+  <div class="container">
+    <h1>Текущие проекты. СтройОборудование.</h1>
+    <div class="grid">
+      <!-- Модели загружаются через JavaScript -->
     </div>
+  </div>
+
+  <script>
+    async function loadModels() {
+      try {
+        const response = await fetch('https://storage.yandexcloud.net/mymodels/models.txt', { mode: 'cors' });
+        if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
+        const text = await response.text();
+        const lines = text.split('\n').filter(line => line.trim() !== '');
+
+        const grid = document.querySelector('.grid');
+        grid.innerHTML = '';
+
+        lines.forEach((line) => {
+          const parts = line.split(',');
+          if (parts.length >= 2) {
+            const name = parts[0].trim();
+            const url = parts[1].trim();
+
+            const projectDiv = document.createElement('div');
+            projectDiv.className = 'project';
+            projectDiv.innerHTML = `
+              <a href="viewer.html?model=${encodeURIComponent(url)}" class="project-link">
+                <div class="model-container">
+                  <model-viewer 
+                    src="${url}" 
+                    poster="https://storage.yandexcloud.net/mymodels/label_1.png"
+                    camera-controls 
+                    camera-orbit="45deg 55deg 2.5m"
+                    field-of-view="30deg"
+                    interaction-prompt="none"
+                    crossOrigin="anonymous">
+                  </model-viewer>
+                </div>
+                <p class="project-title">${name}</p>
+              </a>
+            `;
+            grid.appendChild(projectDiv);
+          } else {
+            console.warn(`Пропущена строка: ${line}`);
+          }
+        });
+      } catch (error) {
+        console.error("Ошибка загрузки списка моделей:", error);
+        document.querySelector('.grid').innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; color: red;">
+            Ошибка загрузки данных. Пожалуйста, проверьте файл models.txt.
+          </div>
+        `;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadModels);
+  </script>
 </body>
 </html>
