@@ -2,150 +2,60 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="https://storage.yandexcloud.net/mymodels/nut.jpg" type="image/x-icon">
     <link rel="icon" href="https://storage.yandexcloud.net/mymodels/favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Текущие проекты. СтройОборудование.</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: url('background.jpg') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 2vw;
-            box-sizing: border-box;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 0 1vw rgba(0, 0, 0, 0.2);
-            overflow-y: auto;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 2em;
-            margin-bottom: 1.5em;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2vw;
-            padding: 2vw 0;
-        }
-
-        .project {
-            text-align: center;
-            background: #fff;
-            padding: 1em;
-            border-radius: 1em;
-            box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            height: 350px;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        .project-link {
-            text-decoration: none;
-            color: black;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-        }
-
-        .model-container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            min-height: 0;
-        }
-
-        .project-title {
-            margin: 0.8em 0 0 0;
-            padding: 0;
-            flex-shrink: 0;
-            font-size: 1.1em;
-        }
-
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .project {
-                height: 300px;
-            }
-        }
+        /* Твой стиль */
     </style>
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer@latest/dist/model-viewer.min.js"></script>
     <script>
         async function loadModels() {
             try {
                 const response = await fetch('https://storage.yandexcloud.net/mymodels/models.txt', { mode: 'cors' });
                 if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
-
                 const text = await response.text();
                 const lines = text.split('\n').filter(line => line.trim() !== '');
-
+                
                 const grid = document.querySelector('.grid');
                 grid.innerHTML = '';
+                console.log("Загруженные данные:", lines);
 
                 lines.forEach((line) => {
                     const [name, url] = line.split(',').map(part => part.trim());
-
                     if (name && url) {
                         const projectDiv = document.createElement('div');
                         projectDiv.className = 'project';
-                        projectDiv.innerHTML = ` 
+                        projectDiv.innerHTML = `
                             <a href="viewer.html?model=${encodeURIComponent(url)}" class="project-link">
                                 <div class="model-container">
-                                    <canvas id="scene${name}" width="100%" height="100%"></canvas>
+                                    <model-viewer 
+                                        src="${url}" 
+                                        poster="https://storage.yandexcloud.net/mymodels/label_1.png"
+                                        camera-controls 
+                                        crossOrigin="anonymous"
+                                        camera-orbit="45deg 55deg 2.5m"
+                                        interaction-prompt="none"
+                                        field-of-view="30deg"
+                                        style="width:100%;height:100%">
+                                    </model-viewer>
                                 </div>
                                 <p class="project-title">${name}</p>
                             </a>
                         `;
                         grid.appendChild(projectDiv);
-                        loadBabylonModel(url, `scene${name}`);
+                    } else {
+                        console.error(`Ошибка в строке: ${line}. Некорректный формат.`);
                     }
                 });
             } catch (error) {
                 console.error("Ошибка загрузки списка моделей:", error);
                 document.querySelector('.grid').innerHTML = `
                     <div style="grid-column:1/-1;text-align:center;color:red;">
-                        Ошибка загрузки данных. Пожалуйста, попробуйте позже.
+                        Ошибка загрузки данных. Пожалуйста, проверьте файл.
                     </div>
                 `;
             }
-        }
-
-        function loadBabylonModel(url, canvasId) {
-            const canvas = document.getElementById(canvasId);
-            const engine = new BABYLON.Engine(canvas, true);
-            const scene = new BABYLON.Scene(engine);
-
-            BABYLON.SceneLoader.Append('', url, scene, () => {
-                scene.createDefaultCameraOrLight(true, true, true);
-                scene.createDefaultEnvironment();
-                engine.runRenderLoop(() => {
-                    scene.render();
-                });
-            });
-
-            window.addEventListener('resize', () => {
-                engine.resize();
-            });
         }
 
         document.addEventListener("DOMContentLoaded", loadModels);
@@ -155,7 +65,7 @@
     <div class="container">
         <h1>Текущие проекты. СтройОборудование.</h1>
         <div class="grid">
-            <!-- Данные загрузятся через JavaScript -->
+            <!-- Модели загружаются через JavaScript -->
         </div>
     </div>
 </body>
