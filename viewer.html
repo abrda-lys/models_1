@@ -34,7 +34,6 @@
       background: rgba(255, 255, 255, 0.9);
       padding: 12px 16px;
       border: 1px solid #999;
-      border-radius: 0;
       font-size: 14px;
       color: #333;
       max-width: 25%;
@@ -103,8 +102,28 @@
   </style>
   <script src="https://cdn.babylonjs.com/loaders/babylon.glTF2FileLoader.js"></script>
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  
+</head>
+<body>
+  <canvas id="modelCanvas"></canvas>
+
+  <div class="description">
+    <strong>Комментарий:</strong>
+    <span id="descriptionText">Загрузка описания...</span>
+  </div>
+
+  <div class="controls">
+    <button class="arrow-button" onclick="rotate(-90)">⬅️</button>
+    <button class="arrow-button" onclick="setTopView()">⬇️</button>
+    <button class="arrow-button" onclick="rotate(90)">➡️</button>
+  </div>
+
+  <button class="projects-button" onclick="location.href='index.html'">
+    ПРОЕКТЫ
+  </button>
+
   <script>
+    let scene;
+    let engine;
     let currentAzimuth = 0;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -113,8 +132,8 @@
 
       if (modelUrl) {
         const canvas = document.getElementById("modelCanvas");
-        const engine = new BABYLON.Engine(canvas, true);
-        const scene = new BABYLON.Scene(engine);
+        engine = new BABYLON.Engine(canvas, true);
+        scene = new BABYLON.Scene(engine);
 
         BABYLON.SceneLoader.Append("", modelUrl, scene, () => {
           scene.createDefaultCameraOrLight(true, true, true);
@@ -122,6 +141,9 @@
           engine.runRenderLoop(() => {
             scene.render();
           });
+        }, null, (scene, message) => {
+          console.error("Ошибка загрузки модели:", message);
+          alert("Не удалось загрузить модель.");
         });
 
         fetch("https://storage.yandexcloud.net/mymodels/models.txt")
@@ -171,23 +193,5 @@
       camera.beta = BABYLON.Tools.ToRadians(90);
     }
   </script>
-</head>
-<body>
-  <canvas id="modelCanvas"></canvas>
-
-  <div class="description">
-    <strong>Комментарий:</strong>
-    <span id="descriptionText">Загрузка описания...</span>
-  </div>
-
-  <div class="controls">
-    <button class="arrow-button" onclick="rotate(-90)">⬅️</button>
-    <button class="arrow-button" onclick="setTopView()">⬇️</button>
-    <button class="arrow-button" onclick="rotate(90)">➡️</button>
-  </div>
-
-  <button class="projects-button" onclick="location.href='index.html'">
-    ПРОЕКТЫ
-  </button>
 </body>
 </html>
